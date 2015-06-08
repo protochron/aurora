@@ -37,6 +37,8 @@ import org.apache.aurora.scheduler.resources.ResourceSlot;
 import org.apache.aurora.scheduler.resources.Resources;
 import org.apache.aurora.scheduler.storage.entities.IAssignedTask;
 import org.apache.aurora.scheduler.storage.entities.IDockerContainer;
+import org.apache.aurora.scheduler.storage.entities.IDockerParameter;
+import org.apache.aurora.scheduler.storage.entities.IDockerPortMapping;
 import org.apache.aurora.scheduler.storage.entities.IJobKey;
 import org.apache.aurora.scheduler.storage.entities.IMetadata;
 import org.apache.aurora.scheduler.storage.entities.IServerInfo;
@@ -206,9 +208,38 @@ public interface MesosTaskFactory {
           item -> Protos.Parameter.newBuilder().setKey(item.getName())
             .setValue(item.getValue()).build());
 
+          new Function<IDockerParameter, Protos.Parameter>() {
+            @Override
+            public Protos.Parameter apply(IDockerParameter item) {
+              return Protos.Parameter.newBuilder().setKey(item.getName())
+                  .setValue(item.getValue()).build();
+            }
+          };
+
+      Iterable<Protos.ContainerInfo.DockerInfo.PortMapping> portMappings = Iterables.transform(
+          config.getPortMappings(),
+          new Function<IDockerPortMapping, Protos.ContainerInfo.DockerInfo.PortMapping>() {
+            @Override
+            public Protos.ContainerInfo.DockerInfo.PortMapping apply(
+                IDockerPortMapping item) {
+              return Protos.ContainerInfo.DockerInfo.PortMapping.newBuilder()
+                  .setHostPort(item.getHostPort())
+                  .setContainerPort(item.getContainerPort())
+                  .setProtocol(item.getProtocol()).build();
+            }
+          });
+
+      ContainerInfo.DockerInfo.Network dockerNetwork = ContainerInfo.DockerInfo.Network.valueOf(
+              config.getNetworkingMode().getValue());
       ContainerInfo.DockerInfo.Builder dockerBuilder = ContainerInfo.DockerInfo.newBuilder()
           .setImage(config.getImage()).addAllParameters(parameters);
       return ContainerInfo.newBuilder()
+          .setImage(config.getImage())
+          .addAllParameters(parameters)
+          .addAllPortMappings(portMappings)
+          .setForcePullImage(config.isForcePullImage())
+          .setNetwork(dockerNetwork)
+          .setPrivileged(config.isPrivileged())
           .setType(ContainerInfo.Type.DOCKER)
           .setDocker(dockerBuilder.build())
           .addAllVolumes(executorSettings.getExecutorConfig().getVolumeMounts())

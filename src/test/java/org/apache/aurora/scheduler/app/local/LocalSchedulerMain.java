@@ -74,6 +74,8 @@ public final class LocalSchedulerMain {
             + ResourceUtils.CLASSPATH_PREFIX
             + "org/apache/aurora/scheduler/http/api/security/shiro-example.ini")
         .add("-enable_h2_console=true")
+        .add("-allowed_container_types=MESOS,DOCKER")
+        .add("-allow_docker_parameters=true")
         .build();
     SchedulerMain.applyStaticArgumentValues(arguments.toArray(new String[] {}));
 

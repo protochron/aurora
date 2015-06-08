@@ -25,6 +25,10 @@ import org.apache.aurora.gen.Container;
 import org.apache.aurora.gen.CronCollisionPolicy;
 import org.apache.aurora.gen.DockerImage;
 import org.apache.aurora.gen.DockerParameter;
+import org.apache.aurora.gen.DockerContainer;
+import org.apache.aurora.gen.DockerNetworkingMode;
+import org.apache.aurora.gen.DockerParameter;
+import org.apache.aurora.gen.DockerPortMapping;
 import org.apache.aurora.gen.ExecutorConfig;
 import org.apache.aurora.gen.Identity;
 import org.apache.aurora.gen.Image;
@@ -119,6 +123,23 @@ public class ConfigurationManagerTest {
         false),
       TaskTestUtil.DEV_TIER_MANAGER);
 
+  private static final TaskConfig CONFIG_WITH_CONTAINER = ITaskConfig.build(new TaskConfig()
+      .setJobName("container-test")
+      .setEnvironment("devel")
+      .setExecutorConfig(new ExecutorConfig())
+      .setOwner(new Identity("role", "user"))
+      .setNumCpus(1)
+      .setRamMb(1)
+      .setDiskMb(1)
+      .setContainer(Container.docker(new DockerContainer()
+          .setImage("testimage")
+          .setNetworkingMode(DockerNetworkingMode.HOST)
+          .setPrivileged(true)
+          .setForcePullImage(false)
+          .setPortMappings(ImmutableList.of(new DockerPortMapping(1, 2).setProtocol("tcp")))
+          .setParameters(ImmutableList.of(new DockerParameter("a", "b"))))))
+      .newBuilder();
+
   @Test
   public void testIsGoodIdentifier() {
     for (String identifier : VALID_IDENTIFIERS) {
@@ -157,12 +178,22 @@ public class ConfigurationManagerTest {
     CONFIGURATION_MANAGER.validateAndPopulate(ITaskConfig.build(builder));
   }
 
+<<<<<<< 95dcca56da934f1daaee6924af057eb60f95ad1e
   @Test
   public void testAllowNoExecutorDockerTask() throws TaskDescriptionException {
     TaskConfig builder = CONFIG_WITH_CONTAINER.newBuilder();
     builder.unsetExecutorConfig();
 
     DOCKER_CONFIGURATION_MANAGER.validateAndPopulate(ITaskConfig.build(builder));
+  }
+
+  @Test
+  public void testBadContainerConfigNetworkingMode()
+      throws TaskDescriptionException {
+    TaskConfig taskConfig = CONFIG_WITH_CONTAINER.deepCopy();
+    taskConfig.getContainer().getDocker().setNetworkingMode(null);
+
+    ConfigurationManager.validateAndPopulate(ITaskConfig.build(taskConfig));
   }
 
   @Test

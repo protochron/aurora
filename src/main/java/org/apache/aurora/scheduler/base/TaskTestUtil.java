@@ -23,7 +23,9 @@ import org.apache.aurora.gen.Constraint;
 import org.apache.aurora.gen.Container;
 import org.apache.aurora.gen.Container._Fields;
 import org.apache.aurora.gen.DockerContainer;
+import org.apache.aurora.gen.DockerNetworkingMode;
 import org.apache.aurora.gen.DockerParameter;
+import org.apache.aurora.gen.DockerPortMapping;
 import org.apache.aurora.gen.ExecutorConfig;
 import org.apache.aurora.gen.Identity;
 import org.apache.aurora.gen.LimitConstraint;
@@ -101,10 +103,17 @@ public final class TaskTestUtil {
         .setMetadata(ImmutableSet.of(new Metadata("key", "value")))
         .setExecutorConfig(new ExecutorConfig("name", "config"))
         .setContainer(Container.docker(
-            new DockerContainer("imagename")
-                .setParameters(ImmutableList.of(
-                    new DockerParameter("a", "b"),
-                    new DockerParameter("c", "d"))))));
+            new DockerContainer()
+            .setImage("imagename")
+            .setNetworkingMode(DockerNetworkingMode.HOST)
+            .setPrivileged(true)
+            .setForcePullImage(true)
+            .setParameters(ImmutableList.of(
+                new DockerParameter("a", "b"),
+                new DockerParameter("c", "d")))
+            .setPortMappings(ImmutableList.of(
+                new DockerPortMapping(8080, 80).setProtocol("tcp"),
+                new DockerPortMapping(8443, 443))))));
   }
 
   public static IScheduledTask makeTask(String id, IJobKey job) {
