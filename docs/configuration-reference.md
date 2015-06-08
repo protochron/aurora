@@ -417,20 +417,34 @@ Describes the container the job's processes will run inside.
 
 ### Docker Object
 
-  param            | type            | description
-  -----            | :----:          | -----------
-  ```image```      | String          | The name of the docker image to execute.  If the image does not exist locally it will be pulled with ```docker pull```.
-  ```parameters``` | List(Parameter) | Additional parameters to pass to the docker containerizer.
+  param                    | type                          | description
+  -----                    | :----:                        | -----------
+  ```image```              | String                        | The name of the docker image to execute.  If the image does not exist locally it will be pulled with ```docker pull```.
+  ```networking_mode       | Enum                          | The networking mode to use to run the container. (HOST, BRIDGED or NONE)
+  ```port_mappings         | List(DockerPortMapping)       | List of port mappings exposed by the container.
+  ```privileged```         | Boolean | When True, thi      s runs the Docker container in privileged mode (the --privileged option). (Default: False)
+  ```parameters```         | List(DockerParameter)         | Additional parameters to pass to the docker containerizer.
+  ```force_pull_image```   | Boolean                       | When True, this forces the Docker daemon to pull the image. (Default: False)
 
 ### Docker Parameter Object
 
-Docker CLI parameters. This needs to be enabled by the scheduler `enable_docker_parameters` option.
-See [Docker Command Line Reference](https://docs.docker.com/reference/commandline/run/) for valid parameters. 
+Docker CLI parameters. This needs to be enabled by the scheduler `-allow_docker_parameters` option.
+See [Docker Command Line Reference](https://docs.docker.com/reference/commandline/run/) for valid parameters.
 
   param            | type            | description
   -----            | :----:          | -----------
   ```name```       | String          | The name of the docker parameter. E.g. volume
   ```value```      | String          | The value of the parameter. E.g. /usr/local/bin:/usr/bin:rw
+
+
+### Docker Port Mapping Object
+Arguments to be passed to the Docker daemon to expose host -> container port mappings (the `-p/--publish` option).
+
+  param                 | type            | description
+  -----                 | :----:          | -----------
+  ```host_port```       | Integer         | The port to expose on the host
+  ```container_port```  | Integer         | The port to map to on the container
+  ```protocol```        | String          | The protocol to expose (tcp or udp)
 
 ### LifecycleConfig Objects
 

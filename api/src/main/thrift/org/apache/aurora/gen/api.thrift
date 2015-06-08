@@ -216,12 +216,44 @@ struct DockerParameter {
   2: string value
 }
 
-/** Describes a docker container */
+/** Describes a Docker networking mode */
+enum DockerNetworkingMode {
+  HOST = 1,
+  BRIDGED = 2,
+  NONE = 3
+}
+
+/** Describes a Docker port mapping between host and container ports
+  * Defaults to using tcp
+  */
+struct DockerPortMapping {
+  1: i32 hostPort,
+  2: i32 containerPort,
+  3: optional string protocol = "tcp"
+}
+
+const set<DockerNetworkingMode> DOCKER_NETWORKING_MODES = [DockerNetworkingMode.HOST
+                                                           DockerNetworkingMode.BRIDGED
+                                                           DockerNetworkingMode.NONE]
+/** Describes a docker container
+  * Ordering of these fields should match the Mesos docker protobuf
+  */
 struct DockerContainer {
   /** The container image to be run */
   1: string image
-  /** The arbitrary parameters to pass to container */
+  /** Networking mode to use with Docker
+   *  HOST (default), BRIDGED or NONE
+  */
+  3: DockerNetworkingMode networkingMode = DockerNetworkingMode.HOST
+  /** Host -> container port mappings */
+  4: optional list<DockerPortMapping> portMappings
+  /** Flag to enable privileged mode
+   *  https://docs.docker.com/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration
+  */
+  5: optional bool privileged = 0
+  /** Arbitrary parameters to pass to the Docker CLI invocation */
   2: optional list<DockerParameter> parameters
+  6: optional bool forcePullImage = 0
 }
 
 /** Describes a container to be used in a task */

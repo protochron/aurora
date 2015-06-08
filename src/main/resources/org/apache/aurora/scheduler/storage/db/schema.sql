@@ -160,6 +160,9 @@ CREATE TABLE task_config_docker_containers(
   id IDENTITY,
   task_config_id INT NOT NULL REFERENCES task_configs(id) ON DELETE CASCADE,
   image VARCHAR NOT NULL,
+  networking_mode INT NOT NULL,
+  privileged BOOLEAN NOT NULL,
+  force_pull_image BOOLEAN NOT NULL,
 
   UNIQUE(task_config_id)
 );
@@ -169,6 +172,15 @@ CREATE TABLE task_config_docker_container_parameters(
   container_id INT NOT NULL REFERENCES task_config_docker_containers(id) ON DELETE CASCADE,
   name VARCHAR NOT NULL,
   value VARCHAR NOT NULL
+);
+
+
+CREATE TABLE task_config_docker_container_port_mappings(
+  id IDENTITY,
+  container_id INT NOT NULL REFERENCES task_config_docker_containers(id) ON DELETE CASCADE,
+  host_port INT NOT NULL,
+  container_port INT NOT NULL,
+  protocol VARCHAR NOT NULL
 );
 
 CREATE TABLE task_states(

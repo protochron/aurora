@@ -22,7 +22,9 @@ import org.apache.aurora.common.testing.easymock.EasyMockTest;
 import org.apache.aurora.gen.AssignedTask;
 import org.apache.aurora.gen.Container;
 import org.apache.aurora.gen.DockerContainer;
+import org.apache.aurora.gen.DockerNetworkingMode;
 import org.apache.aurora.gen.DockerParameter;
+import org.apache.aurora.gen.DockerPortMapping;
 import org.apache.aurora.gen.Identity;
 import org.apache.aurora.gen.JobKey;
 import org.apache.aurora.gen.MesosContainer;
@@ -79,13 +81,20 @@ public class MesosTaskFactoryImplTest extends EasyMockTest {
       .setTask(
           new TaskConfig(TASK.getTask().newBuilder())
               .setContainer(Container.docker(
-                      new DockerContainer("testimage")))));
+                      new DockerContainer("testimage", DockerNetworkingMode.HOST)
+                      .setPrivileged(false)
+                      .setForcePullImage(false)))));
   private static final IAssignedTask TASK_WITH_DOCKER_PARAMS = IAssignedTask.build(TASK.newBuilder()
       .setTask(
           new TaskConfig(TASK.getTask().newBuilder())
               .setContainer(Container.docker(
-                  new DockerContainer("testimage").setParameters(
-                      ImmutableList.of(new DockerParameter("label", "testparameter")))))));
+                  new DockerContainer("testimage", DockerNetworkingMode.HOST)
+                  .setPrivileged(false)
+                  .setForcePullImage(false)
+                  .setParameters(
+                      ImmutableList.of(new DockerParameter("label", "testparameter")))
+                  .setPortMappings(
+                      ImmutableList.of(new DockerPortMapping(8080, 80)))))));
 
   private static final SlaveID SLAVE = SlaveID.newBuilder().setValue("slave-id").build();
 

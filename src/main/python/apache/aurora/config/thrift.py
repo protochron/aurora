@@ -27,7 +27,9 @@ from gen.apache.aurora.api.ttypes import (
     Container,
     CronCollisionPolicy,
     DockerContainer,
+    DockerNetworkingMode,
     DockerParameter,
+    DockerPortMapping,
     ExecutorConfig,
     Identity,
     JobConfiguration,
@@ -131,10 +133,22 @@ def create_container_config(container):
     return Container(MesosContainer(), None)
   elif container.docker() is not Empty:
     params = list()
+    mappings = list()
     if container.docker().parameters() is not Empty:
       for p in fully_interpolated(container.docker().parameters()):
         params.append(DockerParameter(p['name'], p['value']))
-    return Container(None, DockerContainer(fully_interpolated(container.docker().image()), params))
+    networking_mode = parse_enum(DockerNetworkingMode, container.docker().networking_mode())
+    if container.docker().port_mappings() is not Empty:
+      for m in fully_interpolated(container.docker().port_mappings()):
+        mappings.append(DockerPortMapping(m['host_port'], m['container_port'],
+                                          m['protocol'] or 'tcp'))
+    return Container(None, DockerContainer(fully_interpolated(container.docker().image()),
+                                           networking_mode,
+                                           mappings,
+                                           fully_interpolated(container.docker().privileged()),
+                                           params,
+                                           fully_interpolated(container.docker()
+                                                              .force_pull_image())))
   else:
     raise InvalidConfig('If a container is specified it must set one type.')
 
