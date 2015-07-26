@@ -1,0 +1,38 @@
+#!/bin/bash -ex
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+set -o nounset
+
+REPO_DIR=/aurora
+DIST_DIR=$REPO_DIR/dist
+
+function link_apps {
+  ln -sf $DIST_DIR/kaurora.pex /usr/local/bin/aurora
+  ln -sf $DIST_DIR/kaurora_admin.pex /usr/local/bin/aurora_admin
+  ln -sf $DIST_DIR/install/aurora-scheduler/bin/aurora-scheduler /usr/bin/aurora-scheduler
+
+  ./gradlew installDist
+  export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server
+  mkdir -p /var/db/aurora
+  if mesos-log initialize --path="/var/db/aurora"
+  then
+    echo "Replicated log initialized."
+  else
+    echo "Replicated log initialization failed with code $? (likely already initialized)."
+  fi
+  unset LD_LIBRARY_PATH
+  mkdir -p /var/log/aurora
+}
+
+link_apps
