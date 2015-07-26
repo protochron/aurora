@@ -13,20 +13,13 @@
 # limitations under the License.
 #
 #
-# An integration test for the client, using the vagrant environment as a testbed.
+# An integration test for the client. This script should be called by either
+# the Vagrant or Docker wrapper scripts
 
-# Determine if we are already in the vagrant environment.  If not, start it up and invoke the script
-# from within the environment.
-if [[ "$USER" != "vagrant" ]]; then
-  vagrant up
-  vagrant ssh -c /vagrant/src/test/sh/org/apache/aurora/e2e/test_end_to_end.sh "$@"
-  exit $?
-fi
+
 
 set -u -e -x
 set -o pipefail
-
-readonly TEST_SCHEDULER_IP=192.168.33.7
 
 _curl() { curl --silent --fail --retry 4 --retry-delay 10 "$@" ; }
 
@@ -273,7 +266,7 @@ test_basic_auth_unauthenticated() {
 
 RETCODE=1
 # Set up shorthands for test
-export TEST_ROOT=/vagrant/src/test/sh/org/apache/aurora/e2e
+export TEST_ROOT=''
 export EXAMPLE_DIR=${TEST_ROOT}/http
 export DOCKER_DIR=${TEST_ROOT}/docker
 TEST_CLUSTER=devcluster
@@ -305,16 +298,17 @@ TEST_DOCKER_ARGS=(
 
 trap collect_result EXIT
 
-aurorabuild all
 test_version
 test_http_example "${TEST_ARGS[@]}"
 
-# build the test docker image
-sudo docker build -t http_example ${TEST_ROOT}
 test_http_example "${TEST_DOCKER_ARGS[@]}"
 
 test_admin "${TEST_ADMIN_ARGS[@]}"
 test_basic_auth_unauthenticated  "${TEST_ARGS[@]}"
 
-/vagrant/src/test/sh/org/apache/aurora/e2e/test_kerberos_end_to_end.sh
+if VAGRANT; then
+  /vagrant/src/test/sh/org/apache/aurora/e2e/test_kerberos_end_to_end.sh
+else
+  $LOCAL_DIR/test_kerberos_end_to_end.sh
+fi
 RETCODE=0
