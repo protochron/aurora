@@ -13,6 +13,8 @@
  */
 package org.apache.aurora.scheduler.mesos;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -41,6 +43,8 @@ import org.apache.mesos.Protos;
 import org.apache.mesos.Protos.CommandInfo;
 import org.apache.mesos.Protos.CommandInfo.URI;
 import org.apache.mesos.Protos.ContainerInfo.DockerInfo;
+import org.apache.mesos.Protos.ContainerInfo.DockerInfo.Network;
+import org.apache.mesos.Protos.ContainerInfo.DockerInfo.PortMapping;
 import org.apache.mesos.Protos.ExecutorInfo;
 import org.apache.mesos.Protos.Parameter;
 import org.apache.mesos.Protos.Resource;
@@ -57,6 +61,7 @@ import static org.apache.aurora.scheduler.mesos.TaskExecutors.NO_OVERHEAD_EXECUT
 import static org.apache.aurora.scheduler.mesos.TaskExecutors.SOME_OVERHEAD_EXECUTOR;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class MesosTaskFactoryImplTest extends EasyMockTest {
@@ -236,6 +241,8 @@ public class MesosTaskFactoryImplTest extends EasyMockTest {
     DockerInfo docker = getDockerTaskInfo().getExecutor().getContainer().getDocker();
     assertEquals("testimage", docker.getImage());
     assertTrue(docker.getParametersList().isEmpty());
+    assertFalse(docker.getForcePullImage());
+    assertFalse(docker.getPrivileged());
   }
 
   @Test
@@ -244,6 +251,21 @@ public class MesosTaskFactoryImplTest extends EasyMockTest {
             .getDocker();
     Parameter parameters = Parameter.newBuilder().setKey("label").setValue("testparameter").build();
     assertEquals(ImmutableList.of(parameters), docker.getParametersList());
+  }
+
+  @Test
+  public void testDockerContainerWithNetworkingMode() {
+    DockerInfo docker = getDockerTaskInfo(TASK_WITH_DOCKER_PARAMS).getExecutor().getContainer()
+        .getDocker();
+    assertEquals(Network.HOST, docker.getNetwork());
+  }
+
+  @Test public void testDockerContainerWithPortMappings() {
+    DockerInfo docker = getDockerTaskInfo(TASK_WITH_DOCKER_PARAMS).getExecutor().getContainer()
+        .getDocker();
+    PortMapping mapping = PortMapping.newBuilder().setHostPort(8080). setContainerPort(80)
+        .setProtocol("tcp").build();
+    assertEquals(ImmutableList.of(mapping), docker.getPortMappingsList());
   }
 
   @Test(expected = NullPointerException.class)
