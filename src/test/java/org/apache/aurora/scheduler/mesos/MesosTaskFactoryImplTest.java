@@ -15,6 +15,7 @@ package org.apache.aurora.scheduler.mesos;
 
 import java.util.Map;
 import java.util.stream.Collectors;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -49,6 +50,8 @@ import org.apache.mesos.Protos;
 import org.apache.mesos.Protos.ContainerInfo;
 import org.apache.mesos.Protos.ContainerInfo.DockerInfo;
 import org.apache.mesos.Protos.ContainerInfo.Type;
+import org.apache.mesos.Protos.ContainerInfo.DockerInfo.Network;
+import org.apache.mesos.Protos.ContainerInfo.DockerInfo.PortMapping;
 import org.apache.mesos.Protos.ExecutorInfo;
 import org.apache.mesos.Protos.Offer;
 import org.apache.mesos.Protos.Parameter;
@@ -285,6 +288,8 @@ public class MesosTaskFactoryImplTest extends EasyMockTest {
     DockerInfo docker = getDockerTaskInfo().getExecutor().getContainer().getDocker();
     assertEquals("testimage", docker.getImage());
     assertTrue(docker.getParametersList().isEmpty());
+    assertFalse(docker.getForcePullImage());
+    assertFalse(docker.getPrivileged());
   }
 
   @Test
@@ -293,6 +298,21 @@ public class MesosTaskFactoryImplTest extends EasyMockTest {
             .getDocker();
     Parameter parameters = Parameter.newBuilder().setKey("label").setValue("testparameter").build();
     assertEquals(ImmutableList.of(parameters), docker.getParametersList());
+  }
+
+  @Test
+  public void testDockerContainerWithNetworkingMode() {
+    DockerInfo docker = getDockerTaskInfo(TASK_WITH_DOCKER_PARAMS).getExecutor().getContainer()
+        .getDocker();
+    assertEquals(Network.HOST, docker.getNetwork());
+  }
+
+  @Test public void testDockerContainerWithPortMappings() {
+    DockerInfo docker = getDockerTaskInfo(TASK_WITH_DOCKER_PARAMS).getExecutor().getContainer()
+        .getDocker();
+    PortMapping mapping = PortMapping.newBuilder().setHostPort(8080). setContainerPort(80)
+        .setProtocol("tcp").build();
+    assertEquals(ImmutableList.of(mapping), docker.getPortMappingsList());
   }
 
   @Test
@@ -318,6 +338,7 @@ public class MesosTaskFactoryImplTest extends EasyMockTest {
         config.getExecutorConfig().getVolumeMounts(),
         taskInfo.getExecutor().getContainer().getVolumesList());
   }
+
 
   @Test
   public void testMetadataLabelMapping() {
