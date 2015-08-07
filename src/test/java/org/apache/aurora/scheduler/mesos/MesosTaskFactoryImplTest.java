@@ -13,8 +13,6 @@
  */
 package org.apache.aurora.scheduler.mesos;
 
-import jdk.nashorn.internal.ir.annotations.Immutable;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -263,7 +261,7 @@ public class MesosTaskFactoryImplTest extends EasyMockTest {
   @Test public void testDockerContainerWithPortMappings() {
     DockerInfo docker = getDockerTaskInfo(TASK_WITH_DOCKER_PARAMS).getExecutor().getContainer()
         .getDocker();
-    PortMapping mapping = PortMapping.newBuilder().setHostPort(8080). setContainerPort(80)
+    PortMapping mapping = PortMapping.newBuilder().setHostPort(8080).setContainerPort(80)
         .setProtocol("tcp").build();
     assertEquals(ImmutableList.of(mapping), docker.getPortMappingsList());
   }
