@@ -116,7 +116,7 @@ class DockerParameter(Struct):
 class DockerPortMapping(Struct):
   host_port      = Required(Integer)
   container_port = Required(Integer)
-  protocol       = String
+  protocol       = Default(String, "tcp")
 
 class Docker(Struct):
   image            = Required(String)

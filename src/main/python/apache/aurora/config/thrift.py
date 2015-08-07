@@ -141,7 +141,7 @@ def create_container_config(container):
     if container.docker().port_mappings() is not Empty:
       for m in fully_interpolated(container.docker().port_mappings()):
         mappings.append(DockerPortMapping(m['host_port'], m['container_port'],
-                                          m['protocol'] or 'tcp'))
+                                          m['protocol']))
     return Container(None, DockerContainer(fully_interpolated(container.docker().image()),
                                            networking_mode,
                                            mappings,
