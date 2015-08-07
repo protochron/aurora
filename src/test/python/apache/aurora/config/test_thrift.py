@@ -98,7 +98,7 @@ def test_docker_config_with_options():
   hello_with_options = HELLO_WORLD(
     container=Container(
       docker=Docker(image='test_image',
-                    networking_mode='BRIDGED',
+                    networking_mode='BRIDGE',
                     force_pull_image=True,
                     privileged=True,
                     port_mappings=[DockerPortMapping(host_port=8080,

@@ -191,7 +191,7 @@ struct DockerParameter {
 /** Describes a Docker networking mode */
 enum DockerNetworkingMode {
   HOST = 1,
-  BRIDGED = 2,
+  BRIDGE = 2,
   NONE = 3
 }
 
@@ -205,7 +205,7 @@ struct DockerPortMapping {
 }
 
 const set<DockerNetworkingMode> DOCKER_NETWORKING_MODES = [DockerNetworkingMode.HOST
-                                                           DockerNetworkingMode.BRIDGED
+                                                           DockerNetworkingMode.BRIDGE
                                                            DockerNetworkingMode.NONE]
 /** Describes a docker container
   * Ordering of these fields should match the Mesos docker protobuf

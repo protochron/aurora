@@ -220,8 +220,7 @@ public interface MesosTaskFactory {
           config.getPortMappings(),
           new Function<IDockerPortMapping, Protos.ContainerInfo.DockerInfo.PortMapping>() {
             @Override
-            public Protos.ContainerInfo.DockerInfo.PortMapping apply(
-                IDockerPortMapping item) {
+            public Protos.ContainerInfo.DockerInfo.PortMapping apply(IDockerPortMapping item) {
               return Protos.ContainerInfo.DockerInfo.PortMapping.newBuilder()
                   .setHostPort(item.getHostPort())
                   .setContainerPort(item.getContainerPort())
