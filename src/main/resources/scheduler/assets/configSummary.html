@@ -55,8 +55,28 @@
     </td>
   </tr>
   <tr ng-if='group.summary.schedulingDetail.container'>
-    <td class="cellLabel">container</td>
+    <td class="cellLabel" rowspan="6">container</td>
     <td>image</td>
     <td>{{group.summary.schedulingDetail.container.image}}</td>
+  </tr>
+  <tr>
+    <td>networkingMode</td>
+    <td>{{group.summary.schedulingDetail.container.networkingMode}}</td>
+  </tr>
+  <tr>
+    <td>portMappings</td>
+    <td>{{group.summary.schedulingDetail.container.portMappings}}</td>
+  </tr>
+  <tr>
+    <td>privileged</td>
+    <td>{{group.summary.schedulingDetail.container.privileged}}</td>
+  </tr>
+  <tr>
+    <td>parameters</td>
+    <td>{{group.summary.schedulingDetail.container.parameters}}</td>
+  </tr>
+  <tr>
+    <td>forcePullImage</td>
+    <td>{{group.summary.schedulingDetail.container.forcePullImage}}</td>
   </tr>
 </table>
